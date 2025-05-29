@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd">
+
+	<flow name="getClientOrders" doc:id="1059695f-8705-41f4-82fe-84d95242bdf5">
+		<ee:transform doc:name="Transform Message">
+	            <ee:variables>
+	                <ee:set-variable variableName="id">attributes.uriParams.'id'</ee:set-variable>
+	            </ee:variables>
+	        </ee:transform>
+	        <db:select doc:name="Select" doc:id="39071bc5-6e8d-4057-8a7d-27beb949f079" config-ref="Database_Config">
+			<db:sql ><![CDATA[SELECT * FROM ORDERS
+Where clientId = :ID
+
+]]></db:sql>
+			<db:input-parameters ><![CDATA[#[{'ID' : attributes.uriParams.ID}]]]></db:input-parameters>
+		</db:select>
+		<ee:transform doc:name="Transform Message">
+	            <ee:message>
+	                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+	            </ee:message>
+	        </ee:transform>
+	    
+</flow>
+	    <flow name="getAllClients" doc:id="5f120470-f5b0-41e3-9124-bc0b6b5237db">
+        <db:select doc:name="Select" doc:id="bf37d4fe-0064-4bab-af71-eac7581b21e9" config-ref="Database_Config">
+			<db:sql><![CDATA[SELECT * FROM CLIENTS
+]]></db:sql>
+		</db:select>
+		<ee:transform doc:name="Transform Message">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+    
+</flow>
+    <flow name="getClientByID" doc:id="78f0ed9b-0f5f-4d9c-a3a3-0edbeb4d2b47">
+        <db:select doc:name="Select" doc:id="938301f4-cb8f-4357-a688-6c913635e2ef" config-ref="Database_Config">
+			<db:sql><![CDATA[SELECT * FROM CLIENTS
+Where id = :ID
+
+]]></db:sql>
+			<db:input-parameters><![CDATA[#[{'ID' : attributes.uriParams.ID}]]]></db:input-parameters>
+		</db:select>
+		<ee:transform doc:name="Transform Message">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+    
+</flow>
+    
+    <flow name="postClient" doc:id="21985948-4628-46a6-bc3a-30a3e0f5dbe7">
+        <ee:transform doc:name="Transform Message">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+  name: payload.name,
+  address: payload.address
+} as Object {encoding: "UTF-8", mediaType: "application/json"}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+		<db:insert doc:name="Insert" doc:id="c3eb35c7-89ae-4ceb-96d6-a886b42de06a" config-ref="Database_Config">
+			<db:sql ><![CDATA[INSERT INTO clients (name,address)
+VALUES (:name, :address)]]></db:sql>
+			<db:input-parameters ><![CDATA[#[{
+'name' : payload.name,
+'address' : payload.address
+}]]]></db:input-parameters>
+		</db:insert>
+    
+</flow>
+</mule>
