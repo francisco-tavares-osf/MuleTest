@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd ">
+    <flow name="blockbuster-movies-api-main">
+        <http:listener path="/api/*" config-ref="HTTP_Listener_config">
+            <http:response statusCode="#[vars.httpStatus default 200]">
+                <http:headers><![CDATA[#[vars.outboundHeaders default {}]]]></http:headers>
+            </http:response>
+            <http:error-response statusCode="#[vars.httpStatus default 500]">
+                <http:body><![CDATA[#[payload]]]></http:body>
+                <http:headers><![CDATA[#[vars.outboundHeaders default {}]]]></http:headers>
+            </http:error-response>
+        </http:listener>
+        <apikit:router config-ref="Global_Router_Configuration" />
+        <error-handler>
+            <on-error-propagate type="APIKIT:BAD_REQUEST">
+                <ee:transform doc:name="Transform Message">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Bad request"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">400</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:NOT_FOUND">
+                <ee:transform doc:name="Transform Message">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Resource not found"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">404</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:METHOD_NOT_ALLOWED">
+                <ee:transform doc:name="Transform Message">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Method not allowed"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">405</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:NOT_ACCEPTABLE">
+                <ee:transform doc:name="Transform Message">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Not acceptable"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">406</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:UNSUPPORTED_MEDIA_TYPE">
+                <ee:transform doc:name="Transform Message">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Unsupported media type"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">415</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:NOT_IMPLEMENTED">
+                <ee:transform doc:name="Transform Message">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Not Implemented"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">501</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+        </error-handler>
+    </flow>
+    <flow name="blockbuster-movies-api-console">
+        <http:listener path="/console/*" config-ref="HTTP_Listener_config">
+            <http:response statusCode="#[vars.httpStatus default 200]">
+                <http:headers><![CDATA[#[vars.outboundHeaders default {}]]]></http:headers>
+            </http:response>
+            <http:error-response statusCode="#[vars.httpStatus default 500]">
+                <http:body><![CDATA[#[payload]]]></http:body>
+                <http:headers><![CDATA[#[vars.outboundHeaders default {}]]]></http:headers>
+            </http:error-response>
+        </http:listener>
+        <apikit:console config-ref="Global_Router_Configuration"/>
+        <error-handler>
+            <on-error-propagate type="APIKIT:NOT_FOUND">
+                <ee:transform doc:name="Transform Message">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Resource not found"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">404</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+        </error-handler>
+    </flow>
+    <flow name="get-all-clients">
+		<flow-ref doc:name="getAllClients" doc:id="46a02bfd-f18f-40a1-83ca-4acf171315b6" name="get-all-clients"/>
+    </flow>
+    <flow name="get-client-by-id">
+		<flow-ref doc:name="getClientByID" doc:id="ab1907eb-7cca-466f-8d7c-660706dcf024" name="get-client-by-id"/>
+    </flow>
+    <flow name="get-orders-by-blient-id">
+		<flow-ref doc:name="getClientOrders" doc:id="8fee7019-429a-4da7-9f37-5402445bfac4" name="get-client-orders"/>
+    </flow>
+    <flow name="get-all-movies">
+		<flow-ref doc:name="getAllMovies" doc:id="0ccb3cb5-2592-467f-8755-4792e72edec2" name="get-all-movies-db"/>
+    </flow>
+    <flow name="get-movie-by-id">
+		<flow-ref doc:name="getMovieByID" doc:id="fc57ada9-f3fb-4484-9bc8-11485df79135" name="get-movie-by-id-db"/>
+    </flow>
+    <flow name="ge-order-by-id">
+		<flow-ref doc:name="getOrdersByID" doc:id="cd3d427b-77df-4d5a-9f12-fed3366084ba" name="get-orders-by-id-db"/>
+    </flow>
+    <flow name="post-clients-flow">
+		<flow-ref doc:name="postClient" doc:id="4628eecf-33ad-41f1-9801-0ab663a4db75" name="post-client-db"/>
+    </flow>
+    <flow name="post-movies-flow">
+		<flow-ref doc:name="postMovie" doc:id="f9028406-2867-40a8-a72c-fa34b746010b" name="post-movie-db"/>
+    </flow>
+    <flow name="post-orders-flow">
+		<flow-ref doc:name="postOrder" doc:id="0a154fe1-3d69-458b-bdaf-07ddc3523315" name="post-order-db"/>
+    </flow>
+    <flow name="blockbusters-api-templateFlow" doc:id="ac78ff98-4f59-4847-94c7-9e739dc2c8dd" doc:description="This file should be deleted and replaced with the one generated from scaffolding the API RAML specification">
+        <http:listener doc:name="Listener" doc:id="e5daf2a5-c783-4608-9f7f-6c8f3a38a540" config-ref="HTTP_Listener_config" path="/api/v1/health-check"/>
+        <logger level="INFO" doc:name="Processing health check response" doc:id="811ba883-9b51-4ed9-be39-79e40f82af12" message="Received health check request"/>
+        <flow-ref doc:name="Set health check response" doc:id="11b2391d-af8b-44b5-bf69-4116fb1a07e2" name="health-check-flow"/>
+        <logger level="INFO" doc:name="Finished processing health check response" doc:id="d25223ec-af2f-4894-80ed-049517b2efa3" message="Health check request successfully processed" />
+    </flow>
+</mule>

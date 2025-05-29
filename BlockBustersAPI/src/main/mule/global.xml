@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:secure-properties="http://www.mulesoft.org/schema/mule/secure-properties"
+	xmlns:api-gateway="http://www.mulesoft.org/schema/mule/api-gateway" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns:db="http://www.mulesoft.org/schema/mule/db" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd
+http://www.mulesoft.org/schema/mule/api-gateway http://www.mulesoft.org/schema/mule/api-gateway/current/mule-api-gateway.xsd
+http://www.mulesoft.org/schema/mule/secure-properties http://www.mulesoft.org/schema/mule/secure-properties/current/mule-secure-properties.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="161d27c7-7763-49b8-ab17-0fb483b1a539" >
+		<http:listener-connection host="localhost" port="${http.port}" protocol="HTTPS"/>
+	</http:listener-config>
+	<db:config name="Database_Config" doc:name="Database Config" doc:id="0c3339d3-ffea-4ae8-910b-bc4f8f9e8c71" >
+		<db:my-sql-connection host="${db.host}" port="${db.port}" user="${db.user}" password="${db.password}" database="${db.database}"/>
+	</db:config>
+	<configuration-properties doc:name="Configuration properties" doc:id="f7aac33e-9d72-4c2b-8e37-121ad6076a3f" file="properties.application\app-properties.yaml" />
+	<configuration-properties doc:name="Configuration secure properties" doc:id="56a48652-1f78-4ab4-8ed6-12b28caaead2" file="properties.application\app-properties-secure.yaml" />
+	<configuration-properties doc:name="Configuration environment properties" doc:id="6f1f2d1d-ea20-4cd2-9e2a-a4ab2122f801" file="properties.environment\local.yaml" />
+	<apikit:config outboundHeadersMapName="outboundHeadersMapName" httpStatusVarName="httpStatus" doc:name="Global Router Configuration" doc:id="a89e3d78-98c3-4f43-81fb-be145eca7b03" name="Global_Router_Configuration" api="resource::5b3f3667-8e4b-4578-98d6-a1425e364a16:blockbuster-movies-api:1.0.3:raml:zip:blockbuster-movies-api.raml" parser="RAML" keepApiBaseUri="true">
+		<apikit:flow-mappings >
+			<apikit:flow-mapping resource="/clients" action="get" content-type="application/json" flow-ref="getAllClients" />
+			<apikit:flow-mapping resource="/clients/{id}" action="get" content-type="application/json" flow-ref="getClientByID" />
+			<apikit:flow-mapping resource="/clients/{id}/orders" action="get" content-type="application/json" flow-ref="getClientOrders" />
+			<apikit:flow-mapping resource="/movies" action="get" content-type="application/json" flow-ref="getAllMovies" />
+			<apikit:flow-mapping resource="/movies/{id}" action="get" content-type="application/json" flow-ref="getMovieByID" />
+			<apikit:flow-mapping resource="/orders/{id}" action="get" content-type="application/json" flow-ref="getOrdersByID" />
+			<apikit:flow-mapping resource="/orders" action="post" content-type="application/json" flow-ref="postOrder" />
+			<apikit:flow-mapping resource="/movies" action="post" content-type="application/json" flow-ref="postMovie" />
+			<apikit:flow-mapping resource="/clients" action="post" content-type="application/json" flow-ref="postClient" />
+		</apikit:flow-mappings>
+	</apikit:config>
+	<api-gateway:autodiscovery apiId="${autodisc.id}" ignoreBasePath="true" doc:name="API Autodiscovery" doc:id="3319e4b3-87f2-4ed5-b01f-aa6162bea9d2" flowRef="blockbuster-movies-api-main" />
+	<secure-properties:config name="Secure_Properties_Config" doc:name="Secure Properties Config" doc:id="923a638a-7169-4c03-a514-b63c6c826f2a" file="properties.application\app-properties-secure.yaml" key="${key.key}" />
+</mule>

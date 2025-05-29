@@ -1,0 +1,379 @@
+#%RAML 1.0
+title: Blockbuster Movies API
+version: v1
+baseUri: https://api.blockbuster.com/v1
+mediaType: application/json
+
+description: API for managing clients, buy or rent movies, and orders for a Blockbuster-like movie platform.
+
+types:
+  Client:
+    type: object
+    properties:
+      id:
+        type: integer
+        description: Unique client identifier
+        example: 1
+      name:
+        type: string
+        description: Full name of the client
+        example: "John Doe"
+      address:
+        type: string
+        description: Client's address
+        example: "Avenida da Liberdade 778, Gondomar"
+      
+    example: 
+      id: 1
+      name: "John Doe"
+      address: "Avenida da Liberdade 778, Gondomar"
+  ClientInput:
+    type: object
+    properties:
+      name: 
+        type: string
+        required: true
+        description: Full name of the client
+        example: "John Doe"
+      address:
+        type: string
+        required: true
+        description: Client's address
+        example: "Avenida da Liberdade 778, Gondomar"
+    example:
+      name: "John Doe"
+      address: "Avenida da Liberdade 778, Gondomar"
+  Movie:
+    type: object
+    properties:
+      id: 
+        type: integer
+        description: Unique movie identifier
+        example: 101
+      title: 
+        type: string
+        description: Movie title
+        example: "Django Unchained"
+      category:
+        type: string
+        description: Movie category/genre
+        example: "Science Fiction"
+      director:
+        type: string
+        description: Director's name
+        example: "Quentin Tarantino"
+      stock:
+        type: integer
+        description: Available units for purchase or rent
+        example: 5
+      price:
+        type: number
+        format: float
+        description: Price of the movie
+        example: 9.99
+    example:
+      id: 101
+      title: "Django Unchained"
+      category: "Western"
+      director: "Quentin Tarantino" 
+      stock: 5
+      price: 9.99
+  
+  MovieInput:
+    type: object
+    properties:
+      title: 
+        type: string
+        required: true
+        description: Movie title
+        example: "Django Unchained"
+      category:
+        type: string
+        required: true
+        description: Movie category/genre
+        example: "Science Fiction"
+      director:
+        type: string
+        required: true
+        description: Director's name
+        example: "Quentin Tarantino"
+      stock:
+        type: integer
+        required: true
+        description: Available units for purchase or rent
+        example: 5
+      price: 
+        type: number
+        required: true
+        format: float
+        description: Price of the movie
+        example: 9.99
+    example:
+      title: "Django Unchained"
+      category: "Western"
+      director: "Quentin Tarantino" 
+      stock: 5
+      price: 9.99
+
+  Order:
+    type: object
+    properties:
+      id: 
+        type: integer
+        description: Unique order identifier
+        example: 101
+      clientId:
+        type: integer
+        required: true
+        description: ID of the client who placed the order
+        example: 1
+      moviesIds:
+        type: integer[]
+        required: true
+        description: ID of the client who placed the order
+        example: [1,3011]
+      orderType:
+        type: string
+        required: true
+        enum: [buy,rent]
+        description: Specifies if the order id for buying or renting movies
+        example: "buy"
+      createdAt:
+        type: datetime-only
+        description: Order creation timestamp
+        example: "2025-05-22T10:30:00"
+      totalAmount:
+        type: number
+        format: float
+        description: Total amount paid for the order
+        example: 47.98
+    example:
+      id: 5
+      clientId: 1
+      moviesIds: [1,3011]
+      orderType: "buy"
+      createdAt: "2025-05-22T10:30:00"
+      totalAmount: 47.98
+
+  OrderInput:
+    type: object
+    properties:
+      clientId:
+        type: integer
+        description: ID of the client who placed the order
+        example: 1
+      moviesIds:
+        type: integer[]
+        description: ID of the client who placed the order
+        example: [1,3011]
+      orderType:
+        type: string
+        enum: [buy,rent]
+        description: Specifies if the order id for buying or renting movies
+        example: "buy"
+      status:
+        type: string
+        enum: [created,paid,cancelled]
+        description: Status of the order/payment
+        example: "paid"
+    example:
+      id: 2001
+      clientId: 1
+      moviesIds: [1,3011]
+      orderType: "buy"
+      status: "paid"
+      
+  Error:
+    type: object
+    properties:
+      message:
+        type: string
+        description: Error message
+        example: "Resourcer not found"
+    example:
+      message: "Resource not found"
+
+#Clients
+/clients:
+  get:
+    description: Get a list of all clients.
+    responses:
+      200:
+        body:
+          application/json:
+            type: Client[]
+            example:
+              - id: 1
+                name: "John Doe"
+                address: "Avenida da Liberdade 778, Gondomar"
+              - id : 2
+                name: "Jane Doe"
+                address: "Rua Luís de Camões 123, Porto"
+  post:
+    description: Register a new Client
+    body:
+      application/json:
+        type: ClientInput
+    responses:
+      201: 
+        description: Client created succesfully.
+        body:
+          application/json:
+            type: Client
+      400:
+        description: Invalid Input.
+        body:
+          application/json:
+            type: Error
+
+/clients/{id}:
+  uriParameters:
+    id:
+      type: integer
+      description: Unique client identifier
+      example: 1
+  get:
+    description: Get details of a specific client by ID.
+    responses:
+      200:
+        body:
+          application/json:
+            type: Client
+      404:
+        description: Client not found.
+        body:
+          application/json:
+            type: Error
+
+/clients/{id}/orders:
+  uriParameters:
+    id:
+      type: integer
+      description: Uniqye client identifier
+      example: 1
+  get:
+    description: Get all orders for a specific client.
+    responses:
+      200:
+        body:
+          application/json:
+            type: Order[]
+            example:
+              - id: 2001
+                clientId: 1
+                moviesIds: [1, 3001]
+                orderType: "buy"
+                totalAmount: 47.98
+                status: "paid"
+                createdAt: "2025-05-22T10:30:00"
+              - id: 5008
+                clientId: 1
+                moviesIds: [2]
+                orderType: "rent"
+                totalAmount: 47.98
+                status: "created"
+                createdAt: "2025-05-23T10:31:00"
+      400:
+        description: Client not found.
+        body:
+          application/json:
+            type: Error
+#Movies
+/movies:
+  get:
+    description: Get a list of all movies
+    responses:
+      200:
+        body:
+          application/json:
+            type: Movie[]
+            example:
+              - id: 101
+                title: "Django Unchained"
+                category: "Western"
+                director: "Quentin Tarantino"
+                stock: 5
+                price: 9.99
+              - id: 10
+                title: "Hero of Hacksaw Ridge"
+                category: "History"
+                director: "Mel Gibson"
+                stock: 5
+                price: 10.99
+  post: 
+    description: Register a new movie
+    body:
+      application/json:
+        type: MovieInput
+    responses:
+      201:
+        description: Movie registed seccessfully.
+        body:
+          application/json:
+            type: Movie
+      400:
+        description: Invalid input.
+        body:
+          application/json:
+            type: Error
+
+/movies/{id}:
+  uriParameters:
+    id:
+      type: integer
+      description: Unique movie identifier
+      example: 1
+  get:
+    description: Get details of a specific movie by ID.
+    responses:
+      200:
+        body:
+          application/json:
+            type: Movie
+      404:
+        description: Movie not found.
+        body:
+          application/json:
+            type: Error
+
+#Orders
+/orders:
+  post:
+    description: Create a new order for buying or renting movies, and process payment.
+    body:
+      application/json:
+        type: OrderInput
+    responses:
+      201:
+        description: Order created and payment processed.
+        body:
+          application/json:
+            type: Order
+      400:
+        description: Invalid Input
+        body:
+          application/json:
+            type: Error
+
+/orders/{id}:
+  uriParameters:
+    id:
+      type: integer
+      description: Unique order identifier
+      example: 1
+  get:
+    description: Get details of a specific order by ID.
+    responses:
+      200:
+        body:
+          application/json:
+            type: Order
+      404:
+        description: Order not found.
+        body:
+          application/json:
+            type: Error
+
+
+      
+      
