@@ -71,10 +71,10 @@ payload]]></ee:set-payload>
 output application/json
 ---
 {
-  name: payload.name,
-  address: payload.address
-} as Object {encoding: "UTF-8", mediaType: "application/json"}]]></ee:set-payload>
-            </ee:message>
+} ]]></ee:set-payload>
+				<ee:set-attributes resource="dwls/set-post-client.dwl" />
+            
+</ee:message>
         </ee:transform>
 		<db:insert doc:name="Insert" doc:id="c3eb35c7-89ae-4ceb-96d6-a886b42de06a" config-ref="Database_Config">
 			<db:sql ><![CDATA[INSERT INTO clients (name,address)

@@ -146,7 +146,7 @@ output application/json
     <flow name="post-orders-flow">
 		<flow-ref doc:name="postOrder" doc:id="0a154fe1-3d69-458b-bdaf-07ddc3523315" name="post-order-db"/>
     </flow>
-    <flow name="blockbusters-api-templateFlow" doc:id="ac78ff98-4f59-4847-94c7-9e739dc2c8dd" doc:description="This file should be deleted and replaced with the one generated from scaffolding the API RAML specification">
+    <flow name="blockbusters-api-templateflow" doc:id="ac78ff98-4f59-4847-94c7-9e739dc2c8dd" doc:description="This file should be deleted and replaced with the one generated from scaffolding the API RAML specification">
         <http:listener doc:name="Listener" doc:id="e5daf2a5-c783-4608-9f7f-6c8f3a38a540" config-ref="HTTP_Listener_config" path="/api/v1/health-check"/>
         <logger level="INFO" doc:name="Processing health check response" doc:id="811ba883-9b51-4ed9-be39-79e40f82af12" message="Received health check request"/>
         <flow-ref doc:name="Set health check response" doc:id="11b2391d-af8b-44b5-bf69-4116fb1a07e2" name="health-check-flow"/>
