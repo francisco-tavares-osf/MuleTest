@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:json-logger="http://www.mulesoft.org/schema/mule/json-logger"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/json-logger http://www.mulesoft.org/schema/mule/json-logger/current/mule-json-logger.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<sub-flow name="health-check-flow" doc:id="3e2b496a-4702-4f79-a63c-5e894ee95006" >
+		<ee:transform doc:name="Health Check Response" doc:id="c7eb2e2c-a8cf-4c1b-b590-34ecc77b476f" >
+			<ee:message >
+				<ee:set-payload resource="dwls/set-health-check-response.dwl" />
+			</ee:message>
+		</ee:transform>
+	</sub-flow>
+</mule>

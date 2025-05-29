@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd">
+	
+	
+	<flow name="get-orders-by-id-db" doc:id="c6d6825a-b95e-4731-bb41-4822ea294a36">
+        <db:select doc:name="Select" doc:id="b2a787bf-24ac-4134-8a23-7b8e61557513" config-ref="Database_Config">
+			<db:sql><![CDATA[SELECT * FROM ORDERS
+Where id = :ID
+
+]]></db:sql>
+			<db:input-parameters><![CDATA[#[{'ID' : attributes.uriParams.ID}]]]></db:input-parameters>
+		</db:select>
+		<ee:transform doc:name="Transform Message">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+    
+</flow>
+    
+    
+    <flow name="post-order-db" doc:id="85444e6f-455d-49a2-ab11-7b6bcfd24b7a">
+		<set-variable value="#[payload]" doc:name="originalInput" doc:id="97a057df-372d-42b9-86c0-251b030510b5" variableName="OriginalInput"/>
+		<db:select doc:name="Select" doc:id="ca9dd52e-0eda-4acb-ba7e-f80f432a7220" config-ref="Database_Config">
+			<db:sql ><![CDATA[SELECT id, title,price FROM movies WHERE id IN (:movies)]]></db:sql>
+			<db:input-parameters ><![CDATA[#[{
+"movies": payload.moviesIds
+}]]]></db:input-parameters>
+		</db:select>
+		<ee:transform doc:name="Transform Message" doc:id="bf164721-88d2-48bc-bc13-200e9dabee42" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+var moviesFromDb = payload
+var original = vars.OriginalInput
+---
+
+{
+	clientId : original.clientId,
+	moviesIds : original.moviesIds,
+	orderType : original.orderType,
+	status : original.status,
+    totalAmount : sum(payload map ($.price default 0))
+
+               
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<db:insert doc:name="Insert" doc:id="c53c3c40-dcc4-4067-870a-283b14cb0977" config-ref="Database_Config" >
+			<db:sql ><![CDATA[INSERT INTO orders (clientId,orderType,status,total_amount,movieIds)
+VALUES (:clientId,:orderType,:status,:total_amount,:movieIds)]]></db:sql>
+			<db:input-parameters ><![CDATA[#[{
+'clientId' : payload.clientId,
+'orderType' : payload.orderType,
+'total_amount' : payload.totalAmount,
+'status' : vars.OriginalInput.status,
+'movieIds': vars.OriginalInput.moviesIds joinBy ","
+}]]]></db:input-parameters>
+		</db:insert>
+		<logger level="INFO" doc:name="Logger" doc:id="06e99958-8484-47ec-93a2-355cb404e4b7" message="#[payload]"/>
+    
+</flow>
+	
+	</mule>
