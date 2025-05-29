@@ -1,0 +1,11 @@
+%dw 2.0
+
+type auto_943b08c7_8bd6_4593_a768_2912f69ca171_Output_Payload = {
+  director: String, 
+  id: Number, 
+  title: String, 
+  category: String, 
+  stock: Number, 
+  _?: Any
+}
+

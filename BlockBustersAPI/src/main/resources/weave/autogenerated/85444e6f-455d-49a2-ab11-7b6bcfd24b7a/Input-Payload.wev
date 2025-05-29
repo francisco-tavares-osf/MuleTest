@@ -1,0 +1,12 @@
+%dw 2.0
+
+type auto_85444e6f_455d_49a2_ab11_7b6bcfd24b7a_Input_Payload = {
+  orderType: "buy" | "rent", 
+  totalAmount: Number, 
+  createdAt: String, 
+  clientId: Number, 
+  moviesIds: Array<Number> {"description": "ID of the client who placed the order"}, 
+  status: "created" | "paid" | "cancelled", 
+  _?: Any
+}
+

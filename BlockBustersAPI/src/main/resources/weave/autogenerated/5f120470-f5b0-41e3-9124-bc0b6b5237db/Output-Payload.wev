@@ -1,0 +1,5 @@
+%dw 2.0
+
+type auto_5f120470_f5b0_41e3_9124_bc0b6b5237db_Output_Payload = Array<{|  id: Number,   name: String,   address: String|}> {"mediaType": "application/json",
+"encoding": "UTF-8"}
+

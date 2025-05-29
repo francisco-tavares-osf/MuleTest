@@ -1,0 +1,9 @@
+%dw 2.0
+
+type auto_c6d6825a_b95e_4731_bb41_4822ea294a36_Output_Payload = {
+  orderType: "buy" | "rent", 
+  clientId: Number, 
+  moviesIds: Array<Number> {"description": "ID of the client who placed the order"}, 
+  _?: Any
+}
+
